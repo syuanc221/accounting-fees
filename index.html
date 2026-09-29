@@ -83,12 +83,12 @@ details summary::after{content:"＋";color:var(--sub);font-weight:400}
 details[open] summary::after{content:"－"}
 
 form#add .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-label{display:grid;gap:4px;font-size:12px;color:var(--sub);min-width:0}
+label,.lbl{display:grid;gap:4px;font-size:12px;color:var(--sub);min-width:0}
 input,select,textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--chip);border:0;border-radius:12px;padding:10px 12px;width:100%;min-width:0}
 input:focus,select:focus{outline:1.5px solid var(--ink)}
 .items{display:grid;gap:6px}
 .item{display:grid;grid-template-columns:92px 1fr 86px 28px;gap:6px}
-.item button{background:none;border:0;color:var(--sub);cursor:pointer;font-size:18px}
+.item>button{background:none;border:0;color:var(--sub);cursor:pointer;font-size:18px}
 .form-foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
 .check{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink)}
 .check input{width:18px;height:18px;accent-color:var(--ink)}
@@ -127,6 +127,31 @@ a.btn{text-decoration:none;display:inline-block}
 .tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--chip);border-radius:999px;padding:4px}
 .tabs button{font:inherit;font-size:14px;font-weight:500;border:0;border-radius:999px;padding:9px 12px;background:transparent;color:var(--sub);cursor:pointer}
 .tabs button[aria-selected="true"]{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+
+/* custom dropdown */
+.dd{position:relative;min-width:0}
+.dd-btn{font:inherit;font-size:15px;color:var(--ink);background:var(--chip);border:0;border-radius:12px;padding:10px 34px 10px 12px;width:100%;text-align:left;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative}
+.dd-btn::after{content:"";position:absolute;right:13px;top:50%;width:7px;height:7px;border-right:1.6px solid var(--sub);border-bottom:1.6px solid var(--sub);transform:translateY(-70%) rotate(45deg);transition:transform .15s}
+.dd.open .dd-btn::after{transform:translateY(-25%) rotate(225deg)}
+.dd.open .dd-btn{outline:1.5px solid var(--ink)}
+.dd-menu{position:absolute;z-index:30;left:0;top:calc(100% + 6px);min-width:max(100%,150px);background:var(--card);border-radius:16px;box-shadow:0 2px 6px rgba(0,0,0,.06),0 16px 40px rgba(0,0,0,.14);padding:6px;display:grid;gap:2px;animation:ddin .12s ease-out}
+:root[data-theme="dark"] .dd-menu{box-shadow:0 0 0 1px var(--line),0 16px 40px rgba(0,0,0,.5)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .dd-menu{box-shadow:0 0 0 1px var(--line),0 16px 40px rgba(0,0,0,.5)}}
+.dd-menu.up{top:auto;bottom:calc(100% + 6px)}
+.dd-opt{font:inherit;font-size:15px;color:var(--ink);background:transparent;border:0;border-radius:10px;padding:10px 12px;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;white-space:nowrap}
+.dd-opt:hover,.dd-opt:focus-visible{background:var(--chip);outline:none}
+.dd-opt[aria-selected="true"]{font-weight:600}
+.dd-opt[aria-selected="true"]::after{content:"";width:12px;height:6px;border-left:1.8px solid var(--ink);border-bottom:1.8px solid var(--ink);transform:rotate(-45deg) translateY(-2px)}
+@keyframes ddin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.dd-menu{animation:none}.dd-btn::after{transition:none}}
+/* date / month fields */
+input[type=date],input[type=month]{-webkit-appearance:none;appearance:none;position:relative;min-height:43px;padding-right:34px;background-image:linear-gradient(var(--chip),var(--chip));cursor:pointer;text-align:left}
+input[type=date]::-webkit-calendar-picker-indicator,input[type=month]::-webkit-calendar-picker-indicator{opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer}
+input[type=date]::-webkit-date-and-time-value,input[type=month]::-webkit-date-and-time-value{text-align:left}
+.field{position:relative;display:block}
+.field::after{content:"";position:absolute;right:13px;top:50%;width:7px;height:7px;border-right:1.6px solid var(--sub);border-bottom:1.6px solid var(--sub);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.item .dd-btn{padding-right:28px}
+.item .dd-btn::after{right:11px}
 .empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
@@ -172,19 +197,18 @@ a.btn{text-decoration:none;display:inline-block}
   <form id="add" class="card sec" autocomplete="off">
     <div class="sec-h"><h2 id="form-title">新增</h2></div>
     <div class="row">
-      <label>請款日<input type="date" id="f-bill" required></label>
-      <label>付款日<input type="date" id="f-paiddate"></label>
-      <label><span id="l-from">起月</span><input type="month" id="f-from"></label>
-      <label><span id="l-to">迄月</span><input type="month" id="f-to"></label>
+      <label>請款日<span class="field"><input type="date" id="f-bill" required></span></label>
+      <label>付款日<span class="field"><input type="date" id="f-paiddate"></span></label>
+      <label><span id="l-from">起月</span><span class="field"><input type="month" id="f-from"></span></label>
+      <label><span id="l-to">迄月</span><span class="field"><input type="month" id="f-to"></span></label>
     </div>
     <div class="items" id="items"></div>
     <div><button class="btn small" type="button" id="add-item">＋ 加一行項目</button></div>
     <div class="row">
-      <label>誰付的<input type="text" id="f-payer" list="payers" value="Yoona"></label>
+      <div class="lbl"><span>誰付的</span><div id="f-payer-host"></div></div>
       <label>備註<input type="text" id="f-note" placeholder="選填"></label>
     </div>
-    <datalist id="payers"><option value="Yoona"></option><option value="Tim"></option><option value="庭笛"></option></datalist>
-    <div class="form-foot">
+        <div class="form-foot">
       <label class="check"><input type="checkbox" id="f-paid"> 已付款</label>
       <span class="num" id="preview" style="font-weight:600">合計 NT$0</span>
     </div>
@@ -255,6 +279,38 @@ async function deleteBill(id){
 }
 $('#resync').onclick=pull;
 
+
+/* ---------- custom dropdown ---------- */
+let openDD=null;
+function closeDD(){if(openDD){openDD.classList.remove('open');openDD.querySelector('.dd-menu')?.remove();openDD.querySelector('.dd-btn').setAttribute('aria-expanded','false');openDD=null;}}
+document.addEventListener('click',e=>{if(openDD&&!openDD.contains(e.target))closeDD();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&openDD){const b=openDD.querySelector('.dd-btn');closeDD();b.focus();}});
+function makeDD(options,value,label){
+  const wrap=document.createElement('div');wrap.className='dd';
+  const btn=document.createElement('button');btn.type='button';btn.className='dd-btn';btn.setAttribute('aria-haspopup','listbox');btn.setAttribute('aria-expanded','false');if(label)btn.setAttribute('aria-label',label);
+  let cur=options.includes(value)?value:(value||options[0]);if(!options.includes(cur))options=[...options,cur];
+  btn.textContent=cur;wrap.append(btn);
+  Object.defineProperty(wrap,'value',{get:()=>cur,set:v=>{cur=v;if(!options.includes(v))options=[...options,v];btn.textContent=v;}});
+  btn.onclick=e=>{
+    e.stopPropagation();
+    if(openDD===wrap){closeDD();return;}closeDD();
+    const menu=document.createElement('div');menu.className='dd-menu';menu.setAttribute('role','listbox');
+    options.forEach(o=>{const it=document.createElement('button');it.type='button';it.className='dd-opt';it.setAttribute('role','option');it.setAttribute('aria-selected',String(o===cur));it.textContent=o;
+      it.onclick=ev=>{ev.stopPropagation();cur=o;btn.textContent=o;closeDD();btn.focus();wrap.dispatchEvent(new Event('change'));};menu.append(it);});
+    menu.addEventListener('keydown',ev=>{const items=[...menu.children];const i=items.indexOf(document.activeElement);
+      if(ev.key==='ArrowDown'){ev.preventDefault();items[Math.min(i+1,items.length-1)].focus();}
+      if(ev.key==='ArrowUp'){ev.preventDefault();items[Math.max(i-1,0)].focus();}});
+    wrap.append(menu);wrap.classList.add('open');btn.setAttribute('aria-expanded','true');openDD=wrap;
+    const r=menu.getBoundingClientRect();if(r.bottom>innerHeight-8&&r.top-r.height>80)menu.classList.add('up');
+    (menu.querySelector('[aria-selected="true"]')||menu.firstChild).focus({preventScroll:true});
+  };
+  return wrap;
+}
+const PAYERS=['Yoona','Tim','庭笛'];
+const payerDD=makeDD(PAYERS.slice(),'Yoona','誰付的');
+$('#f-payer-host').append(payerDD);
+document.querySelectorAll('input[type=date],input[type=month]').forEach(i=>i.addEventListener('click',()=>{try{i.showPicker();}catch(e){}}));
+
 /* ---------- tabs ---------- */
 function setTab(t){
   tab=t;lsSet(LS_TAB,t);const c=CFG[t];
@@ -271,15 +327,14 @@ document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>setTab(b.data
 function itemRow(it){
   const c=CFG[tab];it=it||{cat:c.cats[0],label:'',amount:''};
   const r=document.createElement('div');r.className='item';
-  const sel=document.createElement('select');sel.setAttribute('aria-label','類別');
-  c.cats.forEach(x=>{const o=document.createElement('option');o.textContent=x;if(x===it.cat)o.selected=true;sel.append(o);});
+  const sel=makeDD(c.cats.slice(),it.cat,'類別');sel.classList.add('cat-dd');
   const lab=document.createElement('input');lab.placeholder='項目';lab.value=it.label||'';lab.setAttribute('aria-label','項目');
   const amt=document.createElement('input');amt.type='number';amt.inputMode='numeric';amt.min='0';amt.placeholder='金額';amt.value=it.amount??'';amt.setAttribute('aria-label','金額');amt.className='num';
   amt.addEventListener('input',updatePreview);
   const x=document.createElement('button');x.type='button';x.textContent='×';x.title='移除這行';x.onclick=()=>{r.remove();updatePreview();};
   r.append(sel,lab,amt,x);return r;
 }
-function readItems(){return [...document.querySelectorAll('#items .item')].map(r=>{const [s,l,a]=r.querySelectorAll('select,input');return {cat:s.value,label:l.value.trim(),amount:Number(a.value)||0};}).filter(i=>i.amount||i.label);}
+function readItems(){return [...document.querySelectorAll('#items .item')].map(r=>{const s=r.querySelector('.cat-dd');const [l,a]=r.querySelectorAll('input');return {cat:s.value,label:l.value.trim(),amount:Number(a.value)||0};}).filter(i=>i.amount||i.label);}
 function updatePreview(){$('#preview').textContent='合計 '+fmt(readItems().reduce((a,i)=>a+i.amount,0));}
 $('#add-item').onclick=()=>{$('#items').append(itemRow({cat:CFG[tab].cats[1]||CFG[tab].cats[0]}));};
 
@@ -385,13 +440,13 @@ function row(b){
 function fillItems(items){const h=$('#items');h.textContent='';(items&&items.length?items:[null]).forEach(i=>h.append(itemRow(i)));updatePreview();}
 function startEdit(b){
   editingId=b.id;$('#f-bill').value=b.billDate||'';$('#f-paiddate').value=b.paidDate||'';$('#f-from').value=b.feeFrom||'';$('#f-to').value=b.feeTo||'';
-  $('#f-payer').value=b.payer||'Yoona';$('#f-note').value=b.note||'';$('#f-paid').checked=!!b.paid;fillItems(b.items);
+  payerDD.value=b.payer||'Yoona';$('#f-note').value=b.note||'';$('#f-paid').checked=!!b.paid;fillItems(b.items);
   $('#form-title').textContent='編輯';$('#submit').textContent='儲存修改';$('#cancel').hidden=false;render();
   $('#add').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function addMonths(k,n){let [y,m]=k.split('-').map(Number);m+=n;while(m>12){m-=12;y++;}return y+'-'+String(m).padStart(2,'0');}
 function resetForm(){
-  const c=CFG[tab];editingId=null;$('#add').reset();$('#f-bill').value=today();$('#f-payer').value='Yoona';
+  const c=CFG[tab];editingId=null;$('#add').reset();$('#f-bill').value=today();payerDD.value='Yoona';
   const tos=bills().map(b=>b.feeTo).filter(Boolean).sort();const last=tos[tos.length-1];
   let a='',b='';if(last){a=addMonths(last,1);b=addMonths(last,c.step);}
   $('#f-from').value=a;$('#f-to').value=b;
@@ -406,7 +461,7 @@ $('#add').addEventListener('submit',async ev=>{
   ev.preventDefault();
   const items=readItems();
   const data={kind:tab,billDate:$('#f-bill').value,paidDate:$('#f-paiddate').value,feeFrom:$('#f-from').value,feeTo:$('#f-to').value||$('#f-from').value,
-    payer:$('#f-payer').value.trim(),note:$('#f-note').value.trim(),paid:$('#f-paid').checked,items};
+    payer:payerDD.value,note:$('#f-note').value.trim(),paid:$('#f-paid').checked,items};
   if(!data.billDate){setStatus('請填請款日',true);return;}
   if(!items.length){setStatus('至少填一行項目和金額',true);return;}
   if(data.paid&&!data.paidDate)data.paidDate=today();
