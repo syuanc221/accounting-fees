@@ -11,7 +11,7 @@
 <meta name="description" content="迷因科技有限公司的會計費與辦公室租金紀錄，同步 Google Sheet。">
 <meta property="og:type" content="website">
 <meta property="og:title" content="迷因科技帳本">
-<meta property="og:description" content="會計費・租金・健保・勞保，一頁記清楚">
+<meta property="og:description" content="會計費・租金・健保，一頁記清楚">
 <meta property="og:url" content="https://syuanc221.github.io/accounting-fees/">
 <meta property="og:image" content="https://syuanc221.github.io/accounting-fees/og.png">
 <meta property="og:image:width" content="1200">
@@ -138,7 +138,7 @@ input:focus,select:focus{outline:1.5px solid var(--ink)}
 .sdot.ok{background:var(--good)}
 .sdot.err{background:var(--bad)}
 a.btn{text-decoration:none;display:inline-block}
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--chip);border-radius:999px;padding:4px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--chip);border-radius:999px;padding:4px}
 .tabs button{font:inherit;font-size:13.5px;font-weight:500;white-space:nowrap;border:0;border-radius:999px;padding:9px 4px;background:transparent;color:var(--sub);cursor:pointer}
 .tabs button[aria-selected="true"]{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
 
@@ -183,7 +183,6 @@ input[type=date]::-webkit-date-and-time-value,input[type=month]::-webkit-date-an
     <button type="button" role="tab" id="tab-acct" data-tab="acct" aria-selected="true">會計費</button>
     <button type="button" role="tab" id="tab-rent" data-tab="rent" aria-selected="false">辦公室租金</button>
     <button type="button" role="tab" id="tab-nhi" data-tab="nhi" aria-selected="false">健保</button>
-    <button type="button" role="tab" id="tab-labor" data-tab="labor" aria-selected="false">勞保</button>
   </nav>
 
   <section class="card hero" aria-label="累計">
@@ -254,9 +253,6 @@ const CFG={
   nhi:{name:'健保',hero:'累計已繳健保費',rate:2171,step:1,monthly:true,cats:['健保費','滯納金','其他'],main:'健保費',
     covTitle:'健保費月份',from:'計費月份（起）',to:'計費月份（迄）',formNew:'新增健保繳款單',
     info:'健保署資料',rows:[['單位','衛福部中央健康保險署 北區業務組'],['洽詢','(03)4339111 轉 2036 張小姐'],['每月保費','2025 年 NT$2,073・2026 年起 NT$2,171'],['繳費期限','次月月底；逾期約 15 天後加徵滯納金'],['繳費方式','繳款單 QR code、超商、ATM（帳號每期不同，見繳款單）']]},
-  labor:{name:'勞保',hero:'累計已繳勞保費',rate:0,step:1,monthly:true,cats:['勞保費','勞退','職災','滯納金','其他'],main:'勞保費',
-    covTitle:'勞保費月份',from:'計費月份（起）',to:'計費月份（迄）',formNew:'新增勞保繳款單',
-    info:'勞保局資料',rows:[['單位','勞動部勞工保險局'],['繳費期限','次月月底'],['繳費方式','繳款單、超商、ATM（見繳款單）']]},
 };
 let all=[],editingId=null,sync=null,tab='acct';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
