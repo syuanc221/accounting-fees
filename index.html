@@ -276,7 +276,9 @@ function readHash(){
   history.replaceState(null,'',location.pathname);
 }
 function showSheetLink(){const a=$('#open-sheet');if(sync&&sync.sheet){a.href=sync.sheet;a.hidden=false;}else a.hidden=true;}
-function take(j){all=j.bills||[];lsSet(LS_CACHE,all);render();setSync('ok','已同步 Google Sheet · '+nowT());}
+function nd(v,n){v=String(v||'');if(!v||(n===7?/^\d{4}-\d{2}$/:/^\d{4}-\d{2}-\d{2}$/).test(v))return v;const d=new Date(v);if(isNaN(d))return '';return (d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')).slice(0,n);}
+function norm(list){return (list||[]).map(b=>Object.assign({},b,{billDate:nd(b.billDate,10),paidDate:nd(b.paidDate,10),feeFrom:nd(b.feeFrom,7),feeTo:nd(b.feeTo,7)}));}
+function take(j){all=norm(j.bills);lsSet(LS_CACHE,all);if(!editingId)resetForm();render();setSync('ok','已同步 Google Sheet · '+nowT());}
 async function pull(){
   if(!sync){setSync('','未連線 Google Sheet，資料只存在這台裝置');return;}
   setSync('','同步中…');
@@ -474,7 +476,7 @@ function startEdit(b){
 function addMonths(k,n){let [y,m]=k.split('-').map(Number);m+=n;while(m>12){m-=12;y++;}return y+'-'+String(m).padStart(2,'0');}
 function resetForm(){
   const c=CFG[tab];editingId=null;$('#add').reset();$('#f-bill').value=today();payerDD.value='Yoona';
-  const tos=bills().map(b=>b.feeTo).filter(Boolean).sort();const last=tos[tos.length-1];
+  const tos=bills().map(b=>b.feeTo).filter(x=>/^\d{4}-\d{2}$/.test(x||'')).sort();const last=tos[tos.length-1];
   let a='',b='';if(last){a=addMonths(last,1);b=addMonths(last,c.step);}
   $('#f-from').value=a;$('#f-to').value=b;
   let label=c.main;
@@ -501,7 +503,7 @@ $('#add').addEventListener('submit',async ev=>{
 /* ---------- boot ---------- */
 readHash();
 sync=sync||lsGet(LS_SYNC);
-all=lsGet(LS_CACHE)||[];
+all=norm(lsGet(LS_CACHE));
 showSheetLink();
 {const h=location.hash.slice(1);setTab(CFG[h]?h:(CFG[lsGet(LS_TAB)]?lsGet(LS_TAB):'acct'));}
 pull();
